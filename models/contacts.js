@@ -1,5 +1,6 @@
 const fs = require("fs/promises");
 const path = require("path");
+const { v4: uuidv4 } = require("uuid");
 
 const CONTACTS_PATH = path.join(__dirname, "contacts.json");
 
@@ -40,14 +41,17 @@ const removeContact = async (contactId) => {
 };
 
 const addContact = async (body) => {
-   try {
-     const contacts = JSON.parse(await fs.readFile(CONTACTS_PATH, "utf8"));
-     contacts.push(body);
-     await fs.writeFile(CONTACTS_PATH, JSON.stringify(contacts));
-     return body;
-   } catch (error) {
-     return console.error(error);
-   }
+  try {
+    const contacts = JSON.parse(await fs.readFile(CONTACTS_PATH, "utf8"));
+    const id = uuidv4();
+    const contactWithId = { ...body, id };
+    contacts.push(contactWithId);
+    await fs.writeFile(CONTACTS_PATH, JSON.stringify(contacts));
+    return contactWithId;
+  } catch (error) {
+    console.error(error);
+    throw error; 
+  }
 };
 
 const updateContact = async (contactId, body) => {
